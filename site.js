@@ -27,7 +27,7 @@ router.post('/create', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
 
-  common_db.createJob(req.body).
+  common_db.createSite(req.body).
   then(function(data) {
     res.send('done');
   });
