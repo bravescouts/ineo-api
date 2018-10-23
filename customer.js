@@ -17,6 +17,22 @@ const logger = winston.createLogger({
   ]
 });
 
+/**
+ * function
+ *
+ */
+
+
+router.get('/:id', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.fetchCustomer(req.params.id).
+  then(function(data) {
+    res.send(data.result);
+  });
+
+}),
 
 /**
  * function

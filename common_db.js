@@ -32,13 +32,13 @@ module.exports = {
  * function 
  *
  */
- fetchUser: function(usr) {
+ fetchEmployee: function(usr) {
   var promise = new Bluebird(
     function(resolve, reject) {
 
       const query = {
         name: 'fetch-user',
-        text: "select * from employees where employee_id = $1",
+        text: "select * from employee where id = $1",
         values: [usr]
       };
 
@@ -53,7 +53,7 @@ module.exports = {
               reject({"result":-1,"executed":query,"error":err});
 
             if(res.hasOwnProperty('rows') && res.rows.length > 0)
-              resolve({"result":res.rows[0].first_name+" "+res.rows[0].last_name,"executed":query});
+              resolve({"result":{"first_name":res.rows[0].first_name, "last_name":res.rows[0].last_name},"executed":query});
             else
               resolve({"result":null, "executed":query});
          })
@@ -91,6 +91,54 @@ createEmployee: function(request, i_id, opp_id) {
 
             resolve({"executed":ins_stmt});
             //resolve(res.rows[0]);
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+/**
+ * function
+ *
+ */
+ fetchCustomer: function(usr) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-customer',
+        text: "select * from customer where id = $1",
+        values: [usr]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            if(res.hasOwnProperty('rows') && res.rows.length > 0)
+              resolve({"result":{
+		        "customer_name":res.rows[0].customer_name,
+		        "first_name":res.rows[0].first_name,
+		        "last_name":res.rows[0].last_name,
+		        "phone":res.rows[0].phone,
+		        "address_1":res.rows[0].address_1,
+		        "address_2":res.rows[0].address_2,
+		        "city":res.rows[0].city,
+		        "postal_code":res.rows[0].postal_code,
+		        "province":res.rows[0].province,
+		        "country":res.rows[0].country,
+		        "county":res.rows[0].county
+	              },"executed":query});
+            else
+              resolve({"result":null, "executed":query});
          })
       })
 
