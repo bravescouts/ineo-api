@@ -164,19 +164,15 @@ createCustomer: function(id, request) {
       }
 
       pool.connect((err, client, done) => {
-        if (err) throw err;
 
           client.query(ins_stmt, (err, res) => {
-	    console.log(ins_stmt);
             done();
             if(err)
               reject({"result":-1,"executed":ins_stmt,"error":err});
 
             resolve({"executed":ins_stmt});
-            //resolve(res.rows[0]);
-         })
-      })
-
+         });
+      });
   })
 
   return promise;
@@ -358,6 +354,40 @@ createMatlEstimate: function(request, i_id, opp_id) {
             }
             else
               resolve({"result":null, "executed":query});
+         })
+      })
+
+  })
+
+  return promise;
+},
+/**
+ * function 
+ *
+ */
+ fetchCountryList: function() {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-countrylist',
+        text: "select id, name from country",
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+            
+            else {
+	      console.log(res);
+              resolve(res.rows);
+
+	    }
          })
       })
 

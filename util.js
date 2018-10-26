@@ -23,47 +23,6 @@ const logger = winston.createLogger({
  */
 
 
-router.get('/:id', function (req, res) {
-
-  if (!req.body) return res.sendStatus(400)
-
-  common_db.fetchCustomer(req.params.id).
-  then(function(data) {
-    res.send(data.result);
-  });
-
-}),
-
-/**
- * function
- *
- */
-
-router.post('/create', function (req, res) {
-
-  var seq = 0;
-  if (!req.body) return res.sendStatus(400)
- 
-  console.log("create customer");
-
-  common_db.getNextSequence('customer').then(function(data) {
-    seq = data.id; 
-    return common_db.createCustomer(data.id, req.body);
-
-  }).then(function(data) {
-    var result = {"id":parseInt(seq)};
-    res.send(result);
-  });
-
-
-
-}),
-
-/**
- * function
- *
- */
-
 router.get('/countrylist', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
@@ -71,7 +30,7 @@ router.get('/countrylist', function (req, res) {
   console.log("countrylist");
   common_db.fetchCountryList(req.params.id).
   then(function(data) {
-    res.send(data.result);
+    res.send(data);
   });
 
 })
