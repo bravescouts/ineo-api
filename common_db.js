@@ -151,7 +151,7 @@ createEmployee: function(request, i_id, opp_id) {
  * function
  *
  */
-createCustomer: function(request, i_id, opp_id) {
+createCustomer: function(id, request) {
   var promise = new Bluebird(
     function(resolve, reject) {
 
@@ -159,16 +159,16 @@ createCustomer: function(request, i_id, opp_id) {
 
       const ins_stmt = {
         name: 'create-customer',
-        text: 'INSERT INTO public.customer( customer_name, first_name, last_name, phone, address_1, address_2, city, postal_code, province, country, county) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
-        values: [request.customer_name, request.first_name, request.last_name, request.phone, request.address_1, request.address_2, request.city, request.postal_code, request.province, request.country, request.county]
+        text: 'INSERT INTO public.customer(id, customer_name, first_name, last_name, phone, address_1, address_2, city, postal_code, province, country, county) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
+        values: [id, request.customer_name, request.first_name, request.last_name, request.phone, request.address_1, request.address_2, request.city, request.postal_code, request.province, request.country, request.county]
       }
 
       pool.connect((err, client, done) => {
         if (err) throw err;
 
           client.query(ins_stmt, (err, res) => {
+	    console.log(ins_stmt);
             done();
-
             if(err)
               reject({"result":-1,"executed":ins_stmt,"error":err});
 
@@ -291,7 +291,82 @@ createMatlEstimate: function(request, i_id, opp_id) {
   })
 
   return promise;
-}
+},
+
+/**
+ * function
+ *
+ */
+ fetchRule: function(usr) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-rule',
+        text: "select * from rule where id = $1",
+        values: [usr]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            if(res.hasOwnProperty('rows') && res.rows.length > 0)
+              resolve({"result":{"condition":res.rows[0].condition},"executed":query});
+            else
+              resolve({"result":null, "executed":query});
+         })
+      })
+
+  })
+
+  return promise;
+},
+/**
+ * function 
+ *
+ */
+ getNextSequence: function(tbl) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-seq',
+	text: "select nextval(pg_get_serial_sequence($1, 'id'))",
+        values: [tbl]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            if(res.rowCount == 1) {
+
+	      console.log("seq = " + res.rows[0].nextval);
+              resolve({"id":res.rows[0].nextval});
+            }
+            else
+              resolve({"result":null, "executed":query});
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+
 
 };
 
