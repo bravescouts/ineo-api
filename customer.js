@@ -64,15 +64,33 @@ router.post('/create', function (req, res) {
  *
  */
 
-router.get('/countrylist', function (req, res) {
+router.get('/list/all', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
 
-  console.log("countrylist");
-  common_db.fetchCountryList(req.params.id).
+  common_db.fetchCustomerList(req.params.id).
   then(function(data) {
-    res.send(data.result);
+    res.send(data);
   });
+
+}),
+/**
+ * function
+ *
+ */
+
+router.get('/delete/:id', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  console.log("delete customer");
+
+  common_db.deleteCustomer(req.params.id).
+  then(function(data) {
+    res.send(data);
+  });
+
+
 
 })
 

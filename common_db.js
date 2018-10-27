@@ -396,6 +396,73 @@ createMatlEstimate: function(request, i_id, opp_id) {
   return promise;
 },
 
+/**
+ * function
+ *
+ */
+ fetchCustomerList: function() {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-cutstomerlist',
+        text: 'select id, customer_name, first_name, last_name, phone, address_1, address_2, city, postal_code, province, country, county from customer',
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve(res.rows);
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+},
+/**
+ * function
+ *
+ */
+ deleteCustomer: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'delete-customer',
+        text: "delete from customer where id = $1",
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else
+              resolve({"deleted customer id":id});
+         })
+      })
+
+  })
+
+  return promise;
+},
+
 
 
 };
