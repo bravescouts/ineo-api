@@ -33,6 +33,23 @@ router.post('/create', function (req, res) {
   });
 
 
-})
+}),
+
+/**
+ * function
+ *
+ */
+
+router.get('/list/all', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  console.log("job list");
+  common_db.fetchJobList(req.params.id).
+  then(function(data) {
+    res.send(data);
+  });
+
+}),
 
 module.exports = router

@@ -33,6 +33,54 @@ router.post('/create', function (req, res) {
   });
 
 
+}),
+/**
+ * function
+ *
+ */
+
+router.get('/list/all', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.fetchEstimateList().
+  then(function(data) {
+    res.send(data);
+  });
+
+}),
+/**
+ * function
+ *
+ */
+
+router.get('/list/job/:id', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.fetchEstimateListByJob(req.params.id).
+  then(function(data) {
+    res.send(data);
+  });
+
+}),
+
+/**
+ * function
+ *
+ */
+
+router.get('/delete/:id', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  console.log("delete estimate");
+
+  common_db.deleteEstimate(req.params.id).
+  then(function(data) {
+    res.send(data);
+  });
+
 })
 
 module.exports = router

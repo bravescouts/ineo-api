@@ -33,6 +33,41 @@ router.post('/create', function (req, res) {
   });
 
 
+}),
+
+/**
+ * function
+ *
+ */
+
+router.get('/list/all', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.fetchSiteList(req.params.id).
+  then(function(data) {
+    res.send(data);
+  });
+
+}),
+
+/**
+ * function
+ *
+ */
+
+router.get('/delete/:id', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  console.log("delete site");
+
+  common_db.deleteSite(req.params.id).
+  then(function(data) {
+    res.send(data);
+  });
+
 })
+
 
 module.exports = router
