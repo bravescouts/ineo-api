@@ -182,7 +182,7 @@ createCustomer: function(id, request) {
  * function
  *
  */
-createSite: function(request, i_id, opp_id) {
+createSite: function(id, request) {
   var promise = new Bluebird(
     function(resolve, reject) {
 
@@ -190,8 +190,8 @@ createSite: function(request, i_id, opp_id) {
 
       const ins_stmt = {
         name: 'create-site',
-        text: 'INSERT INTO public.site(site_name, contact_name, type, phone, address_1, address_2, city, postal_code, province, country, county, latitude, longitude, cust_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)',
-        values: [request.site_name, request.contact_name, request.type, request.phone, request.address_1, request.address_2, request.city, request.postal_code, request.province, request.country, request.county, request.latitude, request.longitude, request.cust_id]
+        text: 'INSERT INTO public.site(id, site_name, contact_name, type, phone, address_1, address_2, city, postal_code, province, country, county, latitude, longitude, cust_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
+        values: [id, request.site_name, request.contact_name, request.type, request.phone, request.address_1, request.address_2, request.city, request.postal_code, request.province, request.country, request.county, request.latitude, request.longitude, request.cust_id]
       }
 
       pool.connect((err, client, done) => {
@@ -660,6 +660,40 @@ createMatlEstimate: function(request, i_id, opp_id) {
 
             else
               resolve({"deleted estimate id":id});
+         })
+      })
+
+  })
+
+  return promise;
+},
+/**
+ * function
+ *
+ */
+ fetchSiteListByCustomer: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-sitelistbycust',
+        text: 'SELECT id, site_name, contact_name, type, phone, address_1, address_2, city, postal_code, province, country, county, latitude, longitude, cust_id FROM site WHERE cust_id = $1',
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve(res.rows);
+
+            }
          })
       })
 

@@ -25,11 +25,18 @@ const logger = winston.createLogger({
 
 router.post('/create', function (req, res) {
 
+ var seq = 0;
   if (!req.body) return res.sendStatus(400)
 
-  common_db.createSite(req.body).
-  then(function(data) {
-    res.send('done');
+  console.log("create site");
+
+  common_db.getNextSequence('site').then(function(data) {
+    seq = data.id;
+    return common_db.createSite(data.id, req.body);
+
+  }).then(function(data) {
+    var result = {"id":parseInt(seq)};
+    res.send(result);
   });
 
 
@@ -45,6 +52,22 @@ router.get('/list/all', function (req, res) {
   if (!req.body) return res.sendStatus(400)
 
   common_db.fetchSiteList(req.params.id).
+  then(function(data) {
+    res.send(data);
+  });
+
+}),
+
+/**
+ * function
+ *
+ */
+
+router.get('/list/customer/:id', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.fetchSiteListByCustomer(req.params.id).
   then(function(data) {
     res.send(data);
   });

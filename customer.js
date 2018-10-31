@@ -74,6 +74,7 @@ router.get('/list/all', function (req, res) {
   });
 
 }),
+
 /**
  * function
  *
