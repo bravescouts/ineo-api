@@ -27,13 +27,17 @@ router.post('/create', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
 
-  common_db.createMatlEstimate(req.body).
-  then(function(data) {
-    res.send('done');
+  common_db.getNextSequence('matl_estimate').then(function(data) {
+    seq = data.id;
+    return common_db.createMatlEstimate(data.id, req.body);
+
+  }).then(function(data) {
+    var result = {"id":parseInt(seq)};
+    res.send(result);
   });
 
-
 }),
+
 /**
  * function
  *

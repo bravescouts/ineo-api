@@ -27,9 +27,13 @@ router.post('/create', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
 
-  common_db.createJob(req.body).
-  then(function(data) {
-    res.send('done');
+  common_db.getNextSequence('job').then(function(data) {
+    seq = data.id;
+    return common_db.createJob(data.id, req.body);
+
+  }).then(function(data) {
+    var result = {"id":parseInt(seq)};
+    res.send(result);
   });
 
 
@@ -51,5 +55,23 @@ router.get('/list/all', function (req, res) {
   });
 
 }),
+
+/**
+ * function
+ *
+ */
+
+router.get('/delete/:id', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  console.log("delete site");
+
+  common_db.deleteJob(req.params.id).
+  then(function(data) {
+    res.send(data);
+  });
+
+})
 
 module.exports = router

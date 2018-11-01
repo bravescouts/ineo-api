@@ -219,7 +219,7 @@ createSite: function(id, request) {
  * function
  *
  */
-createJob: function(request, i_id, opp_id) {
+createJob: function(id, request) {
   var promise = new Bluebird(
     function(resolve, reject) {
 
@@ -227,8 +227,8 @@ createJob: function(request, i_id, opp_id) {
 
       const ins_stmt = {
         name: 'create-job',
-        text: 'INSERT INTO public.job(cust_id, site_id, name, supervisor_id, contact_name, start_date, type, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-        values: [request.cust_id, request.site_id, request.name, request.supervisor_id, request.contact_name, request.start_date, request.type, request.status]
+        text: 'INSERT INTO public.job(id, cust_id, site_id, name, supervisor_id, contact_name, start_date, type, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+        values: [id, request.cust_id, request.site_id, request.name, request.supervisor_id, request.contact_name, request.start_date, request.type, request.status]
       }
 
       pool.connect((err, client, done) => {
@@ -256,7 +256,7 @@ createJob: function(request, i_id, opp_id) {
  * function
  *
  */
-createMatlEstimate: function(request, i_id, opp_id) {
+createMatlEstimate: function(id, request) {
   var promise = new Bluebird(
     function(resolve, reject) {
 
@@ -264,8 +264,8 @@ createMatlEstimate: function(request, i_id, opp_id) {
 
       const ins_stmt = {
         name: 'create-estimate',
-        text: 'INSERT INTO public.matl_estimate(job_id, area, area_level, application_type, matl_type, matl_size, matl_dim, matl_attr1, matl_attr2, matl_attr3, matl_attr4, matl_attr5, qty) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)',
-        values: [request.job_id, request.area, request.area_level, request.application_type, request.matl_type, request.matl_size, request.matl_dim, request.matl_attr1, request.matl_attr2, request.matl_attr3, request.matl_attr4, request.matl_attr5, request.qty]
+        text: 'INSERT INTO public.matl_estimate(id, job_id, area, area_level, application_type, matl_type, matl_size, matl_dim, matl_attr1, matl_attr2, matl_attr3, matl_attr4, matl_attr5, qty) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)',
+        values: [id, request.job_id, request.area, request.area_level, request.application_type, request.matl_type, request.matl_size, request.matl_dim, request.matl_attr1, request.matl_attr2, request.matl_attr3, request.matl_attr4, request.matl_attr5, request.qty]
       }
 
       pool.connect((err, client, done) => {
@@ -507,7 +507,7 @@ createMatlEstimate: function(request, i_id, opp_id) {
 
       const query = {
         name: 'fetch-joblist',
-        text: 'SELECT id, cust_id, site_id, name, supervisor_id, contact_name, start_date, type, status from job'
+        text: 'SELECT id, cust_id, site_id, name, supervisor_id, contact_name, to_char(start_date, \'YYYY-MM-DD\') as start_date, type, status from job'
       };
 
       pool.connect((err, client, done) => {
@@ -694,6 +694,40 @@ createMatlEstimate: function(request, i_id, opp_id) {
               resolve(res.rows);
 
             }
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+/**
+ * function
+ *
+ */
+ deleteJob: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'delete-job',
+        text: "delete from job where id = $1",
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else
+              resolve({"deleted job id":id});
          })
       })
 
