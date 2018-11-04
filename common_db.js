@@ -264,8 +264,8 @@ createMatlEstimate: function(id, request) {
 
       const ins_stmt = {
         name: 'create-estimate',
-        text: 'INSERT INTO public.matl_estimate(id, job_id, area, area_level, application_type, matl_type, matl_size, matl_dim, matl_attr1, matl_attr2, matl_attr3, matl_attr4, matl_attr5, qty) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)',
-        values: [id, request.job_id, request.area, request.area_level, request.application_type, request.matl_type, request.matl_size, request.matl_dim, request.matl_attr1, request.matl_attr2, request.matl_attr3, request.matl_attr4, request.matl_attr5, request.qty]
+        text: 'INSERT INTO public.matl_estimate(id, job_id, area, area_level, application_type, matl_type, matl_length, matl_dim, matl_attr1, matl_attr2, matl_attr3, matl_attr4, matl_attr5, qty) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)',
+        values: [id, request.job_id, request.area, request.area_level, request.application_type, request.matl_type, request.matl_length, request.matl_dim, request.matl_attr1, request.matl_attr2, request.matl_attr3, request.matl_attr4, request.matl_attr5, request.qty]
       }
 
       pool.connect((err, client, done) => {
@@ -535,13 +535,48 @@ createMatlEstimate: function(id, request) {
  * function
  *
  */
+ fetchJobsBySite: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-joblistbysite',
+        text: 'SELECT id, cust_id, site_id, name, supervisor_id, contact_name, to_char(start_date, \'YYYY-MM-DD\') as start_date, type, status from job where site_id = $1',
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve(res.rows);
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+/**
+ * function
+ *
+ */
  fetchEstimateList: function() {
   var promise = new Bluebird(
     function(resolve, reject) {
 
       const query = {
         name: 'fetch-estimatelist',
-        text: 'SELECT id, job_id, area, area_level, application_type, matl_type, matl_size, matl_dim, matl_attr1, matl_attr2, matl_attr3, matl_attr4, matl_attr5, qty FROM matl_estimate'
+        text: 'SELECT id, job_id, area, area_level, application_type, matl_type, matl_length, matl_dim, matl_attr1, matl_attr2, matl_attr3, matl_attr4, matl_attr5, qty FROM matl_estimate'
       };
 
       pool.connect((err, client, done) => {
@@ -575,7 +610,7 @@ createMatlEstimate: function(id, request) {
 
       const query = {
         name: 'fetch-estimatelist',
-        text: 'SELECT id, job_id, area, area_level, application_type, matl_type, matl_size, matl_dim, matl_attr1, matl_attr2, matl_attr3, matl_attr4, matl_attr5, qty FROM matl_estimate WHERE job_id = $1',
+        text: 'SELECT id, job_id, area, area_level, application_type, matl_type, matl_length, matl_dim, matl_attr1, matl_attr2, matl_attr3, matl_attr4, matl_attr5, qty FROM matl_estimate WHERE job_id = $1',
         values: [id]
       };
 
@@ -735,6 +770,143 @@ createMatlEstimate: function(id, request) {
 
   return promise;
 },
+
+/**
+ * function
+ *
+ */
+fetchActiveJobs: function() {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-activejobs',
+        text: 'select job.name as jobname, job_id, mlen.text as len, mthick.text as thick, mtype.text as material, sum(qty) as qty, job.status from job, matl_estimate, matl_attributes mtype, matl_attributes mlen, matl_attributes mthick where matl_estimate.job_id = job.id and job.status = 1 and matl_type = mtype.value and matl_estimate.job_id = job.id and mtype.attrib_id = 3 and matl_length = mlen.value and mlen.attrib_id = 1 and mthick.attrib_id = 2 and matl_dim = mthick.value group by jobname, job_id, len, thick, material, job.status order by job_id, material'
+      };
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve(res.rows);
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+/**
+ * function
+ *
+ */
+fetchSiteTags: function() {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-sitetags',
+        text: 'SELECT concat(site_name,address_1) as text, id as value, cust_id FROM site'
+      };
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve(res.rows);
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+/**
+ * function
+ *
+ */
+ fetchJobDetails: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-jobdetails',
+        text: 'select j.id, c.customer_name, j.name as jobname, s.address_1 as jobaddress, s.city, s.phone, j.start_date, count(m.area) numestimates from customer c, job j, site s, matl_estimate m where j.id = $1 and j.cust_id = c.id and s.id = j.site_id and m.job_id = j.id group by j.id, c.customer_name, jobname, jobaddress, s.city, s.phone, j.start_date',
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve(res.rows);
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+/**
+ * function
+ *
+ */
+fetchSite: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-sitelistbycust',
+        text: 'SELECT id, site_name, contact_name, type, phone, address_1, address_2, city, postal_code, province, country, county, latitude, longitude, cust_id FROM site WHERE id = $1',
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve(res.rows);
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+},
+
 
 };
 

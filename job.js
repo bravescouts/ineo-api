@@ -72,6 +72,56 @@ router.get('/delete/:id', function (req, res) {
     res.send(data);
   });
 
-})
+}),
+
+/**
+ * function
+ *
+ */
+
+router.get('/list/active', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  console.log("job active job list");
+  common_db.fetchActiveJobs().
+  then(function(data) {
+    res.send(data);
+  });
+
+}),
+
+/**
+ * function
+ *
+ */
+
+router.get('/list/site/:id', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  console.log("job list by site");
+  common_db.fetchJobsBySite(req.params.id).
+  then(function(data) {
+    res.send(data);
+  });
+
+}),
+
+/**
+ * function
+ *
+ */
+
+router.get('/details/:id', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.fetchJobDetails(req.params.id).
+  then(function(data) {
+    res.send(data);
+  });
+
+}),
 
 module.exports = router

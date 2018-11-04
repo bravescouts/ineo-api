@@ -79,6 +79,22 @@ router.get('/list/customer/:id', function (req, res) {
  *
  */
 
+router.get('/:id', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.fetchSite(req.params.id).
+  then(function(data) {
+    res.send(data);
+  });
+
+}),
+
+/**
+ * function
+ *
+ */
+
 router.get('/delete/:id', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
@@ -90,7 +106,23 @@ router.get('/delete/:id', function (req, res) {
     res.send(data);
   });
 
-})
+}),
+
+/**
+ * function
+ *
+ */
+
+router.get('/list/tags', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.fetchSiteTags().
+  then(function(data) {
+    res.send(data);
+  });
+
+}),
 
 
 module.exports = router
