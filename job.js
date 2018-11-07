@@ -79,14 +79,33 @@ router.get('/delete/:id', function (req, res) {
  *
  */
 
-router.get('/list/active', function (req, res) {
+router.get('/list/active/:siteID', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
 
-  console.log("job active job list");
-  common_db.fetchActiveJobs().
+  var estimateSummary = null;
+
+  common_db.fetchActiveJobs(req.params.siteID).
   then(function(data) {
-    res.send(data);
+
+    var estimates = [];
+    for (var i=0; i<data.length; i++) {
+      var obj = Object.assign({id:(i+1)}, data[i]);
+      estimates.push(obj)
+    }
+
+    estimateSummary = estimates;
+    return common_db.fetchAreas(req.params.siteID);
+
+  }).then(function(data) {
+
+    var areas = [];
+    for (var i=0; i<data.length; i++) {
+      areas.push(data[i].text)
+    }
+
+    var result = {"estimateSummary":estimateSummary, "areas":areas};
+    res.send(result);
   });
 
 }),

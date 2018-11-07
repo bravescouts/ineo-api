@@ -775,13 +775,14 @@ createMatlEstimate: function(id, request) {
  * function
  *
  */
-fetchActiveJobs: function() {
+fetchActiveJobs: function(id) {
   var promise = new Bluebird(
     function(resolve, reject) {
 
       const query = {
         name: 'fetch-activejobs',
-        text: 'select job.name as jobname, job_id, mlen.text as len, mthick.text as thick, mtype.text as material, sum(qty) as qty, job.status from job, matl_estimate, matl_attributes mtype, matl_attributes mlen, matl_attributes mthick where matl_estimate.job_id = job.id and job.status = 1 and matl_type = mtype.value and matl_estimate.job_id = job.id and mtype.attrib_id = 3 and matl_length = mlen.value and mlen.attrib_id = 1 and mthick.attrib_id = 2 and matl_dim = mthick.value group by jobname, job_id, len, thick, material, job.status order by job_id, material'
+        text: 'select job.name as jobname, job_id, mlen.text as len, mthick.text as thick, mtype.text as material, sum(qty) as qty, job.status from job, matl_estimate, matl_attributes mtype, matl_attributes mlen, matl_attributes mthick where job.site_id = $1 and  matl_estimate.job_id = job.id and job.status = 1 and matl_type = mtype.value and matl_estimate.job_id = job.id and mtype.attrib_id = 3 and matl_length = mlen.value and mlen.attrib_id = 1 and mthick.attrib_id = 2 and matl_dim = mthick.value group by jobname, job_id, len, thick, material, job.status order by job_id, material',
+        values: [id]
       };
       pool.connect((err, client, done) => {
         if (err) throw err;
@@ -899,6 +900,154 @@ fetchSite: function(id) {
               resolve(res.rows);
 
             }
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+/**
+ * function
+ *
+ */
+fetchAreas: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-areas',
+        text: 'SELECT distinct area as text FROM matl_estimate m, job j where m.job_id = j.id and j.site_id = $1', 
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              console.log(res.rows);
+              resolve(res.rows);
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+/**
+ * function
+ *
+ */
+fetchMatlUsedRow: function(data) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+  
+      const query = {
+        name: 'fetch-matl-used-row',
+        text: 'SELECT job_id, area_level, matl_type, matl_length, matl_dim, used_qty FROM matl_used WHERE job_id = $1 AND area_level = $2 AND matl_type = $3 AND matl_length = $4 AND matl_dim = $5', 
+        values: [data.job_id, data.area_level, data.matl_type, data.matl_length, data.matl_dim]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve(res.rows);
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+
+},
+
+/**
+ * function
+ *
+ */
+createMatlUsedRow: function(request) {
+
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      var dt = new Date();
+
+      const ins_stmt = {
+        name: 'create-matl-used-row',
+        text: 'INSERT INTO matl_used(job_id, area_level, matl_type, matl_length, matl_dim) VALUES ($1,$2,$3,$4,$5)',
+        values: [request.job_id, request.area_level, request.matl_type, request.matl_length, request.matl_dim]
+      }
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(ins_stmt, (err, res) => {
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":ins_stmt,"error":err});
+
+	    //return a row representing a new record with empty used_qty
+	    var result = Object.assign({used_qty:null}, request); 
+
+            resolve(result);
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+/**
+ * function
+ *
+ */
+updateMatlUsed: function(request) {
+
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      var dt = new Date();
+
+      const ins_stmt = {
+        name: 'create-matl-used-row',
+        text: 'UPDATE matl_used SET used_qty = used_qty + $1 WHERE job_id=$2 AND area_level=$3 AND matl_type=$4 AND matl_length=$5 AND matl_dim=$6',
+        values: [request.used_qty, request.job_id, request.area_level, request.matl_type, request.matl_length, request.matl_dim]
+      }
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(ins_stmt, (err, res) => {
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":ins_stmt,"error":err});
+
+            //return a row representing a new record with empty used_qty
+            var result = Object.assign({used_qty:null}, request);
+
+            resolve(result);
          })
       })
 
