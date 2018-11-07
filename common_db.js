@@ -781,7 +781,7 @@ fetchActiveJobs: function(id) {
 
       const query = {
         name: 'fetch-activejobs',
-        text: 'select job.name as jobname, job_id, mlen.text as len, mthick.text as thick, mtype.text as material, sum(qty) as qty, job.status from job, matl_estimate, matl_attributes mtype, matl_attributes mlen, matl_attributes mthick where job.site_id = $1 and  matl_estimate.job_id = job.id and job.status = 1 and matl_type = mtype.value and matl_estimate.job_id = job.id and mtype.attrib_id = 3 and matl_length = mlen.value and mlen.attrib_id = 1 and mthick.attrib_id = 2 and matl_dim = mthick.value group by jobname, job_id, len, thick, material, job.status order by job_id, material',
+        text: 'select job.name as jobname, est.job_id, est.area_level, mlen.text as len, mlen.value as lenID, mthick.text as thick, mthick.value as thickID, mtype.text as material, mtype.value as materialID, sum(qty) as qty, job.status, COALESCE(used.used_qty,0) as used_qty from job, matl_attributes mtype, matl_attributes mlen, matl_attributes mthick, matl_estimate as est left outer join matl_used as used on (est.job_id = used.job_id and est.matl_type = used.matl_type and est.matl_length = used.matl_length and est.matl_dim = used.matl_dim) where job.site_id = $1 and est.job_id = job.id and job.status = 1 and est.matl_type = mtype.value and est.job_id = job.id and mtype.attrib_id = 3 and est.matl_length = mlen.value and mlen.attrib_id = 1 and mthick.attrib_id = 2 and est.matl_dim = mthick.value group by jobname, est.job_id, est.area_level, len, lenID, thick, thickID, material, materialID, job.status, used_qty order by job_id, material',
         values: [id]
       };
       pool.connect((err, client, done) => {
@@ -993,7 +993,7 @@ createMatlUsedRow: function(request) {
 
       const ins_stmt = {
         name: 'create-matl-used-row',
-        text: 'INSERT INTO matl_used(job_id, area_level, matl_type, matl_length, matl_dim) VALUES ($1,$2,$3,$4,$5)',
+        text: 'INSERT INTO matl_used(job_id, area_level, matl_type, matl_length, matl_dim, used_qty) VALUES ($1,$2,$3,$4,$5,0)',
         values: [request.job_id, request.area_level, request.matl_type, request.matl_length, request.matl_dim]
       }
 
@@ -1030,7 +1030,7 @@ updateMatlUsed: function(request) {
       var dt = new Date();
 
       const ins_stmt = {
-        name: 'create-matl-used-row',
+        name: 'update-matl-used-row',
         text: 'UPDATE matl_used SET used_qty = used_qty + $1 WHERE job_id=$2 AND area_level=$3 AND matl_type=$4 AND matl_length=$5 AND matl_dim=$6',
         values: [request.used_qty, request.job_id, request.area_level, request.matl_type, request.matl_length, request.matl_dim]
       }

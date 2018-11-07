@@ -110,17 +110,17 @@ router.post('/used', function (req, res) {
 
   }).then(function(data) {
 
-    if(req.body.used_qty > 0) {
+    if(req.body.used_qty != null) {
       return common_db.updateMatlUsed(req.body);
     }
     return data;
 
   }).then(function(data) {
-    if(req.body.used_qty > 0) {
+    if(req.body.used_qty != null) {
       return common_db.fetchMatlUsedRow(req.body);
     }
     else
-      res.send(data);
+     return data;
   }).then(function(data) {
 
       res.send(data);
