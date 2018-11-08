@@ -815,7 +815,7 @@ fetchSiteTags: function() {
 
       const query = {
         name: 'fetch-sitetags',
-        text: 'SELECT concat(site_name,address_1) as text, id as value, cust_id FROM site'
+	text: 'SELECT concat(site_name,address_1) as text, site.id as value, site.cust_id, job.id as job_id, greatest(job.created) FROM site, job where job.site_id = site.id'
       };
       pool.connect((err, client, done) => {
         if (err) throw err;
