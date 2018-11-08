@@ -1056,6 +1056,41 @@ updateMatlUsed: function(request) {
   return promise;
 },
 
+/**
+ * function
+ *
+ */
+fetchAttributeMenu: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-matl-used-row',
+        text: 'select text, value FROM matl_attributes where attrib_id = $1',
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve(res.rows);
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+
+},
 
 };
 

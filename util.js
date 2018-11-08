@@ -33,6 +33,40 @@ router.get('/countrylist', function (req, res) {
     res.send(data);
   });
 
+}),
+
+router.get('/attributes', function(req, res) {
+  if (!req.body) return res.sendStatus(400)
+
+  var mnu1;
+  var mnu2;
+  var mnu3;
+  var mnu4;
+  var mnu5;
+
+  common_db.fetchAttributeMenu(1).then(function(data) {
+
+    mnu1 = data;
+    return common_db.fetchAttributeMenu(2);
+  }).then(function(data) {
+
+    mnu2 = data; 
+    return common_db.fetchAttributeMenu(3);
+  }).then(function(data) {
+
+    mnu3 = data;
+    return common_db.fetchAttributeMenu(4);
+  }).then(function(data) {
+
+    mnu4 = data;
+    return common_db.fetchAttributeMenu(5);
+  }).then(function(data) {
+
+     mnu5 = data;
+     res.send({"mnuMatlLength":mnu1, "mnuMatlThick":mnu2, "mnuMatlType":mnu3, "mnuLevel":mnu4, "mnuApplication":mnu5 });
+  });
+
+	
 })
 
 module.exports = router
