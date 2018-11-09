@@ -124,5 +124,20 @@ router.get('/list/tags', function (req, res) {
 
 }),
 
+/**
+ * function
+ *
+ */
+
+router.post('/update', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.updateSite(req.body).
+  then(function(data) {
+    res.send(data);
+  });
+
+})
 
 module.exports = router

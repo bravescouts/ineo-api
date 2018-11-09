@@ -44,6 +44,24 @@ router.post('/create', function (req, res) {
  *
  */
 
+router.post('/update', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.updateJob(req.body).
+  then(function(data) {
+    res.send(data);
+  });
+
+
+}),
+
+
+/**
+ * function
+ *
+ */
+
 router.get('/list/all', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)

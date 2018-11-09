@@ -1092,5 +1092,77 @@ fetchAttributeMenu: function(id) {
 
 },
 
+/**
+ * function
+ *
+ */
+updateJob: function(request) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'update-job',
+        text: 'UPDATE job SET cust_id= $1, site_id= $2, name= $3, supervisor_id= $4, contact_name= $5, start_date= $6, type= $7, status= $8 WHERE id = $9', 
+        values: [request.cust_id, request.site_id, request.name, request.supervisor_id, request.contact_name, request.start_date, request.type, request.status, request.id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve({id:request.id});
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+
+},
+
+/**
+ * function
+ *
+ */
+updateSite: function(request) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'update-site',
+        text: 'UPDATE public.site SET site_name=$1, contact_name=$2, type=$3, phone=$4, address_1=$5, address_2=$6, city=$7, postal_code=$8, province=$9, country=$10, county=$11, latitude=$12, longitude=$13, cust_id=$14 WHERE id = $15',
+        values: [request.site_name, request.contact_name, request.type, request.phone, request.address_1, request.address_2, request.city, request.postal_code, request.province, request.country, request.county, request.latitude, request.longitude, request.cust_id, request.id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve({id:request.id});
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+
+},
+
 };
 
