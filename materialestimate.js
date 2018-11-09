@@ -126,7 +126,23 @@ router.post('/used', function (req, res) {
       res.send(data);
   });
 
+}),
+/**
+ * function
+ *
+ */
+
+router.post('/update', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.updateEstimate(req.body).
+  then(function(data) {
+    res.send(data);
+  });
+
 })
+
 
 
 module.exports = router

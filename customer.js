@@ -91,7 +91,21 @@ router.get('/delete/:id', function (req, res) {
     res.send(data);
   });
 
+}),
 
+/**
+ * function
+ *
+ */
+
+router.post('/update', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.updateCustomer(req.body).
+  then(function(data) {
+    res.send(data);
+  });
 
 })
 

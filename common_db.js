@@ -1164,5 +1164,79 @@ updateSite: function(request) {
 
 },
 
+/**
+ * function
+ *
+ */
+updateCustomer: function(request) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'update-customer',
+        text: 'UPDATE public.customer SET customer_name=$1, first_name=$2, last_name=$3, phone=$4, address_1=$5, address_2=$6, city=$7, postal_code=$8, province=$9, country=$10, county=$11 WHERE ID = $12',
+        values: [request.customer_name, request.first_name, request.last_name, request.phone, request.address_1, request.address_2, request.city, request.postal_code, request.province, request.country, request.county, request.id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve({id:request.id});
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+
+},
+/**
+ * function
+ *
+ */
+updateEstimate: function(request) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'update-estimate',
+        text: 'UPDATE public.matl_estimate SET area=$1, area_level=$2, application_type=$3, matl_type=$4, matl_length=$5, matl_dim=$6, matl_attr1=$7, matl_attr2=$8, matl_attr3=$9, matl_attr4=$10, matl_attr5=$11, qty=$12, updated=now() WHERE id = $13',
+        values: [request.area, request.area_level, request.application_type, request.matl_type, request.matl_length, request.matl_dim, null, null, null, null, null, parseInt(request.qty), request.id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err) {
+		 console.log(err);
+              reject({"result":-1,"executed":query,"error":err});
+
+	    }
+            else {
+              resolve({id:request.id});
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+
+},
+
+
 };
 
