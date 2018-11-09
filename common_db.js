@@ -264,8 +264,8 @@ createMatlEstimate: function(id, request) {
 
       const ins_stmt = {
         name: 'create-estimate',
-        text: 'INSERT INTO public.matl_estimate(id, job_id, area, area_level, application_type, matl_type, matl_length, matl_dim, matl_attr1, matl_attr2, matl_attr3, matl_attr4, matl_attr5, qty) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)',
-        values: [id, request.job_id, request.area, request.area_level, request.application_type, request.matl_type, request.matl_length, request.matl_dim, request.matl_attr1, request.matl_attr2, request.matl_attr3, request.matl_attr4, request.matl_attr5, request.qty]
+        text: 'INSERT INTO public.matl_estimate(id, job_id, area, area_level, application_type, matl_type, matl_length, matl_dim, matl_attr1, matl_attr2, matl_attr3, matl_attr4, matl_attr5, qty, created) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
+        values: [id, request.job_id, request.area, request.area_level, request.application_type, request.matl_type, request.matl_length, request.matl_dim, request.matl_attr1, request.matl_attr2, request.matl_attr3, request.matl_attr4, request.matl_attr5, request.qty, 'now()']
       }
 
       pool.connect((err, client, done) => {
