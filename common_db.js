@@ -1200,7 +1200,7 @@ updateCustomer: function(request) {
 
 },
 /**
- * function
+ * function: updateEstimate
  *
  */
 updateEstimate: function(request) {
