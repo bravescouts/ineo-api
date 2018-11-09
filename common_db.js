@@ -1237,6 +1237,79 @@ updateEstimate: function(request) {
 
 },
 
+/**
+ * function
+ *
+ */
+createNote: function(id, request) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      var dt = new Date();
+
+      const ins_stmt = {
+        name: 'create-note',
+        text: 'INSERT INTO public.note(id, job_id, site_id, note, created) VALUES ($1, $2, $3, $4, now())',
+        values: [id, request.job_id, request.site_id, request.note]
+      }
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(ins_stmt, (err, res) => {
+            done();
+
+            if(err) {
+              console.log(err);
+              reject({"result":-1,"executed":ins_stmt,"error":err});
+
+            }
+            resolve({"executed":ins_stmt});
+            //resolve(res.rows[0]);
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+/**
+ * function 
+ *
+ */
+ fetchNotesByJob: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-notes-by-job',
+        text: "select * from note where job_id = $1",
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            if(res.hasOwnProperty('rows') && res.rows.length > 0)
+              resolve(res.rows);
+            else
+              resolve({"result":null, "executed":query});
+         })
+      })
+
+  })
+
+  return promise;
+},
+
 
 };
 

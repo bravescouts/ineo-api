@@ -6,6 +6,7 @@ var customer = require('./customer')
 var util = require('./util')
 var site = require('./site')
 var rule = require('./rule')
+var note = require('./note')
 var materialestimate = require('./materialestimate')
 var bodyParser = require('body-parser');
 
@@ -30,5 +31,6 @@ app.use('/site', site);
 app.use('/materialestimate', materialestimate);
 app.use('/rule', rule);
 app.use('/util', util);
+app.use('/note', note);
 
 app.listen(5000, () => console.log('app listening on port 5000!'))
