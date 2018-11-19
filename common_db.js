@@ -1309,6 +1309,40 @@ createNote: function(id, request) {
 
   return promise;
 },
+/**
+ * function 
+ *
+ */
+fetchJobEvents: function() {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-job-events',
+        text: "SELECT id, name as title, concat(start_date,'T08:00:00') as start, cust_id, site_id FROM public.job"
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            if(res.hasOwnProperty('rows') && res.rows.length > 0)
+              resolve(res.rows);
+            else
+              resolve({"result":null, "executed":query});
+         })
+      })
+
+  })
+
+  return promise;
+},
 
 
 };

@@ -160,5 +160,21 @@ router.get('/details/:id', function (req, res) {
   });
 
 }),
+/**
+ * function
+ *
+ */
+
+router.get('/calendar', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.fetchJobEvents().
+  then(function(data) {
+    res.send(data);
+  });
+
+}),
+
 
 module.exports = router
