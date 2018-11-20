@@ -1275,6 +1275,44 @@ createNote: function(id, request) {
 },
 
 /**
+ * function
+ *
+ */
+createTask: function(id, request) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      var dt = new Date();
+
+      const ins_stmt = {
+        name: 'create-task',
+        text: 'INSERT INTO public.task(id, text, created, start_date, end_date) VALUES ($1, $2, now(), $3, $4)',
+        values: [id, request.text, request.start, request.end]
+      }
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(ins_stmt, (err, res) => {
+            done();
+
+            if(err) {
+              console.log(err);
+              reject({"result":-1,"executed":ins_stmt,"error":err});
+
+            }
+            resolve({"executed":ins_stmt});
+            //resolve(res.rows[0]);
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+
+/**
  * function 
  *
  */
@@ -1319,7 +1357,7 @@ fetchJobEvents: function() {
 
       const query = {
         name: 'fetch-job-events',
-        text: "SELECT id, name as title, concat(start_date,'T08:00:00') as start, cust_id, site_id FROM public.job"
+        text: "SELECT site.address_1, site.city, site.postal_code, job.id, job.name as title, concat(job.start_date,'T08:00:00') as start, 'teal' as color, job.site_id, job.cust_id FROM job, site where site.id = job.site_id"
       };
 
       pool.connect((err, client, done) => {
@@ -1343,6 +1381,76 @@ fetchJobEvents: function() {
 
   return promise;
 },
+
+/**
+ * function 
+ *
+ */
+ fetchTaskList: function() {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-all-tasks',
+        text: "select id, start_date as start, end_date as end, text as title, 'orange' as color, 'task' as type from task order by start"
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            if(res.hasOwnProperty('rows') && res.rows.length > 0)
+              resolve(res.rows);
+            else
+              resolve({"result":null, "executed":query});
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+/**
+ * function
+ *
+ */
+ deleteTask: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'delete-task',
+        text: "delete from task where id = $1",
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else
+              resolve({"deleted task id":id});
+         })
+      })
+
+  })
+
+  return promise;
+},
+
 
 
 };
