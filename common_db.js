@@ -1451,6 +1451,42 @@ fetchJobEvents: function() {
   return promise;
 },
 
+/**
+ * function
+ *
+ */
+updateTask: function(request) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'update-task',
+        text: 'UPDATE public.task SET end_date = $1 where id = $2',
+        values: [request.end, request.id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve({id:request.id});
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+
+},
+
 
 
 };

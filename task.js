@@ -27,7 +27,6 @@ router.post('/create', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
 
-  console.log(req.body);
   common_db.getNextSequence('task').then(function(data) {
     seq = data.id;
     return common_db.createTask(data.id, req.body);
