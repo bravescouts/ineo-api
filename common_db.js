@@ -21,10 +21,10 @@ const logger = winston.createLogger({
 
 
 const pool = new Pool({
-  user: dbConfig.user,
-  host: dbConfig.host,
-  database: dbConfig.database,
-  password: dbConfig.password
+  user: 'postgres',
+  host: '127.0.0.1',
+  database: 'ineo',
+  password: 'Overl0rd1944' 
 });
 
 module.exports = {
@@ -135,7 +135,8 @@ createEmployee: function(request, i_id, opp_id) {
 		        "postal_code":res.rows[0].postal_code,
 		        "province":res.rows[0].province,
 		        "country":res.rows[0].country,
-		        "county":res.rows[0].county
+		        "county":res.rows[0].county,
+                        "email":res.rows[0].email
 	              },"executed":query});
             else
               resolve({"result":null, "executed":query});
@@ -361,6 +362,7 @@ createMatlEstimate: function(id, request) {
 
   return promise;
 },
+
 /**
  * function 
  *
@@ -406,7 +408,7 @@ createMatlEstimate: function(id, request) {
 
       const query = {
         name: 'fetch-cutstomerlist',
-        text: 'select id, customer_name as value, customer_name, first_name, last_name, phone, address_1, address_2, city, postal_code, province, country, county from customer',
+        text: 'select id, customer_name as value, customer_name, first_name, last_name, phone, address_1, address_2, city, postal_code, province, country, county, email from customer',
       };
 
       pool.connect((err, client, done) => {
@@ -771,6 +773,7 @@ createMatlEstimate: function(id, request) {
   return promise;
 },
 
+
 /**
  * function
  *
@@ -815,7 +818,8 @@ fetchSiteTags: function() {
 
       const query = {
         name: 'fetch-sitetags',
-	text: 'SELECT concat(site_name,address_1) as text, site.id as value, site.cust_id, job.id as job_id, greatest(job.created) FROM site, job where job.site_id = site.id'
+        text: 'select \'C\' as type,id as value, customer_name as text, id as cust_id from customer UNION select \'J\' as type,id as value, name as text, cust_id  from job'
+	//text: 'SELECT concat(site_name,address_1) as text, site.id as value, site.cust_id, job.id as job_id, greatest(job.created) FROM site, job where job.site_id = site.id'
       };
       pool.connect((err, client, done) => {
         if (err) throw err;
@@ -1174,8 +1178,8 @@ updateCustomer: function(request) {
 
       const query = {
         name: 'update-customer',
-        text: 'UPDATE public.customer SET customer_name=$1, first_name=$2, last_name=$3, phone=$4, address_1=$5, address_2=$6, city=$7, postal_code=$8, province=$9, country=$10, county=$11 WHERE ID = $12',
-        values: [request.customer_name, request.first_name, request.last_name, request.phone, request.address_1, request.address_2, request.city, request.postal_code, request.province, request.country, request.county, request.id]
+        text: 'UPDATE public.customer SET customer_name=$1, first_name=$2, last_name=$3, phone=$4, address_1=$5, address_2=$6, city=$7, postal_code=$8, province=$9, country=$10, county=$11, email=$12 WHERE ID = $13',
+        values: [request.customer_name, request.first_name, request.last_name, request.phone, request.address_1, request.address_2, request.city, request.postal_code, request.province, request.country, request.county, request.email, request.id]
       };
 
       pool.connect((err, client, done) => {
@@ -1249,8 +1253,8 @@ createNote: function(id, request) {
 
       const ins_stmt = {
         name: 'create-note',
-        text: 'INSERT INTO public.note(id, job_id, site_id, note, created) VALUES ($1, $2, $3, $4, now())',
-        values: [id, request.job_id, request.site_id, request.note]
+        text: 'INSERT INTO public.note(id, job_id, site_id, customer_id, note, created) VALUES ($1, $2, $3, $4, $5, now())',
+        values: [id, request.job_id, request.site_id, request.customer_id, request.note]
       }
 
       pool.connect((err, client, done) => {
@@ -1336,7 +1340,42 @@ createTask: function(id, request) {
             if(err)
               reject({"result":-1,"executed":query,"error":err});
 
-            if(res.hasOwnProperty('rows') && res.rows.length > 0)
+            if(res != null && res.hasOwnProperty('rows') && res.rows.length > 0)
+              resolve(res.rows);
+            else
+              resolve({"result":null, "executed":query});
+         })
+      })
+
+  })
+
+  return promise;
+},
+/**
+ *  * function 
+ *   *
+ *    */
+ fetchNotesByCustomer: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-notes-by-customer',
+        text: "select * from note where customer_id = $1",
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            if(res != null && res.hasOwnProperty('rows') && res.rows.length > 0)
               resolve(res.rows);
             else
               resolve({"result":null, "executed":query});

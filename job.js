@@ -92,6 +92,7 @@ router.get('/delete/:id', function (req, res) {
 
 }),
 
+
 /**
  * function
  *
@@ -160,6 +161,14 @@ router.get('/details/:id', function (req, res) {
   });
 
 }),
+
+router.get('/test', function (req, res) {
+
+
+  res.send("ok");
+
+}),
+
 /**
  * function
  *
