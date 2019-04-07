@@ -53,7 +53,7 @@ module.exports = {
               reject({"result":-1,"executed":query,"error":err});
 
             if(res.hasOwnProperty('rows') && res.rows.length > 0)
-              resolve({"result":{"first_name":res.rows[0].first_name, "last_name":res.rows[0].last_name},"executed":query});
+              resolve({"result":{"first_name":res.rows[0].first_name, "last_name":res.rows[0].last_name, "phone":res.rows[0].phone},"executed":query});
             else
               resolve({"result":null, "executed":query});
          })
@@ -76,8 +76,8 @@ createEmployee: function(request, i_id, opp_id) {
 
       const ins_stmt = {
         name: 'create-employee',
-	text: 'INSERT INTO public.employee(first_name, last_name) VALUES ($1,$2)',
-        values: [request.first_name, request.last_name]
+	text: 'INSERT INTO public.employee(first_name, last_name, phone) VALUES ($1,$2,$3)',
+        values: [request.first_name, request.last_name, request.phone]
       }
 
       pool.connect((err, client, done) => {
@@ -464,6 +464,41 @@ createMatlEstimate: function(id, request) {
 
   return promise;
 },
+
+/**
+ *  
+ */
+ fetchEmployeeList: function() {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-employeelist',
+        text: "select id, first_name, last_name, phone from employee",
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              console.log(res);
+              resolve(res.rows);
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+},
+
 
 /**
  * function
