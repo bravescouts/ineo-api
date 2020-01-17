@@ -17,22 +17,6 @@ const logger = winston.createLogger({
   ]
 });
 
-/**
- * function
- *
- */
-
-
-router.get('/:id', function (req, res) {
-
-  if (!req.body) return res.sendStatus(400)
- 
-  common_db.fetchEmployee(req.params.id).
-  then(function(data) {
-    res.send(data.result);
-  });
-
-}),
 
 /**
  * function
@@ -43,40 +27,31 @@ router.post('/create', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
 
-  common_db.createEmployee(req.body).
-  then(function(data) {
-    res.send('done');
+  common_db.getNextSequence('rma_line').then(function(data) {
+    seq = data.id;
+    return common_db.createRMALine(data.id, 'new', req.body);
+
+  }).then(function(data) {
+    var result = {"id":parseInt(seq)};
+    res.send(result);
   });
 
 
 }),
 
-/**
- *  * function
- *   *
- *    */
-
-router.get('/list/all', function (req, res) {
-
-  if (!req.body) return res.sendStatus(400)
-
-  common_db.fetchEmployeeList(req.params.id).
-  then(function(data) {
-    res.send(data);
-  });
-
-}),
 
 /**
- *  * function
- *   *
- *    */
+ * function
+ *
+ */
 
 router.get('/delete/:id', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
 
-  common_db.deleteEmployee(req.params.id).
+  console.log("delete rma line");
+
+  common_db.deleteRMALine(req.params.id).
   then(function(data) {
     res.send(data);
   });

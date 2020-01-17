@@ -17,70 +17,26 @@ const logger = winston.createLogger({
   ]
 });
 
-/**
- * function
- *
- */
-
-
-router.get('/:id', function (req, res) {
-
-  if (!req.body) return res.sendStatus(400)
- 
-  common_db.fetchEmployee(req.params.id).
-  then(function(data) {
-    res.send(data.result);
-  });
-
-}),
 
 /**
  * function
  *
  */
 
-router.post('/create', function (req, res) {
+
+router.get('/content/:id', function (req, res) {
+
+  console.log("content by id");
 
   if (!req.body) return res.sendStatus(400)
 
-  common_db.createEmployee(req.body).
-  then(function(data) {
-    res.send('done');
-  });
-
-
-}),
-
-/**
- *  * function
- *   *
- *    */
-
-router.get('/list/all', function (req, res) {
-
-  if (!req.body) return res.sendStatus(400)
-
-  common_db.fetchEmployeeList(req.params.id).
+  common_db.fetchContentByID(req.params.id).
   then(function(data) {
     res.send(data);
   });
 
 }),
 
-/**
- *  * function
- *   *
- *    */
 
-router.get('/delete/:id', function (req, res) {
-
-  if (!req.body) return res.sendStatus(400)
-
-  common_db.deleteEmployee(req.params.id).
-  then(function(data) {
-    res.send(data);
-  });
-
-}),
 
 module.exports = router

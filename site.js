@@ -60,6 +60,29 @@ router.get('/list/all', function (req, res) {
 
 /**
  * function
+ * 
+ */
+
+router.get('/list/models/:val', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.fetchModels(req.params.val).
+  then(function(data) {
+
+    var arr = [];
+    data.forEach(function(item) {
+      arr.push(item.model);
+    });
+
+    res.send(arr);
+  });
+
+}),
+
+
+/**
+ * function
  *
  */
 

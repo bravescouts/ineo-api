@@ -17,22 +17,6 @@ const logger = winston.createLogger({
   ]
 });
 
-/**
- * function
- *
- */
-
-
-router.get('/:id', function (req, res) {
-
-  if (!req.body) return res.sendStatus(400)
- 
-  common_db.fetchEmployee(req.params.id).
-  then(function(data) {
-    res.send(data.result);
-  });
-
-}),
 
 /**
  * function
@@ -43,44 +27,76 @@ router.post('/create', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
 
-  common_db.createEmployee(req.body).
-  then(function(data) {
-    res.send('done');
+  common_db.getNextSequence('rma').then(function(data) {
+    seq = data.id;
+    return common_db.createRMA(data.id, 'new', req.body);
+
+  }).then(function(data) {
+    var result = {"id":parseInt(seq)};
+    res.send(result);
   });
 
 
 }),
 
-/**
- *  * function
- *   *
- *    */
 
-router.get('/list/all', function (req, res) {
+/**
+ * function
+ *
+ */
+
+router.get('/delete/:refno', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
 
-  common_db.fetchEmployeeList(req.params.id).
+  console.log("delete rma");
+
+  common_db.deleteRMA(req.params.refno).
   then(function(data) {
     res.send(data);
   });
 
 }),
 
-/**
- *  * function
- *   *
- *    */
-
-router.get('/delete/:id', function (req, res) {
+router.get('/:refno', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
 
-  common_db.deleteEmployee(req.params.id).
+  var rmaObj = null;
+ 
+  common_db.fetchRMA(req.params.refno).
   then(function(data) {
-    res.send(data);
+ 
+    rmaObj = data.result;
+ 
+    return common_db.fetchRMALines(data.result.id);
+
+  })
+  .then((r) => {
+
+    var lines = [];
+    for (var i=0; i<r.length; i++) {
+      lines.push(r[i])
+    }
+
+    rmaObj.lines = lines;
+
+    res.send(rmaObj);
   });
 
+
+  //fetchRMALines
+  //
+  //
+
 }),
+
+router.get('/test', function (req, res) {
+
+
+  res.send("rma ok");
+
+}),
+
 
 module.exports = router

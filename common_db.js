@@ -27,6 +27,13 @@ const pool = new Pool({
   password: 'Overl0rd1944' 
 });
 
+const poolTraining = new Pool({
+  user: 'postgres',
+  host: '127.0.0.1',
+  database: 'training',
+  password: 'Overl0rd1944'
+});
+
 module.exports = {
 /**
  * function 
@@ -468,6 +475,38 @@ createMatlEstimate: function(id, request) {
 /**
  *  
  */
+ deleteEmployee: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'delete-employee',
+        text: "delete from employee where id = $1",
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else
+              resolve({"deleted employee id":id});
+         })
+      })
+
+  })
+
+  return promise;
+},
+/**
+ *  
+ */
  fetchEmployeeList: function() {
   var promise = new Bluebird(
     function(resolve, reject) {
@@ -843,6 +882,38 @@ fetchActiveJobs: function(id) {
   return promise;
 },
 
+//for testing autocomplete
+fetchModels: function(val) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-sitetags',
+        text: 'select model from model where model like $1',
+        values:['%'+val+'%']
+
+      };
+      pool.connect((err, client, done) => {
+      if (err) throw err;
+        
+        client.query(query, (err, res) => {
+       
+        done();
+        if(err)
+          reject({"result":-1,"executed":query,"error":err});
+        
+        else {
+        resolve(res.rows);
+        
+        }
+        })
+        })
+        
+        })
+        
+        return promise;
+},
+        
 /**
  * function
  *
@@ -1561,6 +1632,235 @@ updateTask: function(request) {
 
 },
 
+ fetchContentByID: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-content',
+        text: "select source from source_content where id = $1",
+        values: [id]
+      };
+
+      poolTraining.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err) {
+              console.log(err);
+              reject({"result":-1,"executed":query,"error":err});
+
+            }
+
+            if(res.hasOwnProperty('rows') && res.rows.length > 0)
+              resolve(res.rows);
+            else
+              resolve({"result":null, "executed":query});
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+/**
+ *  function
+ *  
+ **/
+createRMA: function(id, status, request) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      var dt = new Date();
+
+      const ins_stmt = {
+        name: 'create-rma',
+	text: 'INSERT INTO public.rma(id, name, refno, status, c_id, created) VALUES ($1,$2,$3,$4,$5,$6)',
+        values: [id, request.name, request.refno, status, request.c_id, 'now()']
+      }
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(ins_stmt, (err, res) => {
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":ins_stmt,"error":err});
+
+            resolve({"executed":ins_stmt});
+           
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+ fetchRMA: function(refno) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-rma',
+        text: "select * from rma where refno = $1",
+        values: [refno]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            if(res.hasOwnProperty('rows') && res.rows.length > 0)
+              resolve({"result":{
+		        "id":res.rows[0].id,
+		        "created":res.rows[0].created,
+		        "name":res.rows[0].name,
+		        "c_id":res.rows[0].c_id,
+		        "refno":res.rows[0].refno,
+		        "status":res.rows[0].status },"executed":query});
+            else
+              resolve({"result":null, "executed":query});
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+deleteRMA: function(refno) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'delete-rma',
+        text: "delete from rma where refno = $1",
+        values: [refno]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else
+              resolve({"deleted rma refno":refno});
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+createRMALine: function(id, status, request) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      var dt = new Date();
+
+      const ins_stmt = {
+        name: 'create-rmaline',
+        text: 'INSERT INTO public.rma_line(id, rma_id, erp_line_id, model_number, serial_number, product_id) VALUES ($1,$2,$3,$4,$5,$6)',
+        values: [id, request.rma_id, request.erp_line_id, request.model_number, request.serial_number, request.product_id]
+      }
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(ins_stmt, (err, res) => {
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":ins_stmt,"error":err});
+
+            resolve({"executed":ins_stmt});
+
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+deleteRMALine: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'delete-rmaline',
+        text: "delete from rma_line where id = $1",
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else
+              resolve({"deleted rmaline id":id});
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+ fetchRMALines: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-rmalines-byrma',
+        text: 'SELECT id, rma_id, erp_line_id, status, reason, exception, model_number, serial_number from rma_line where rma_id = $1',
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve(res.rows);
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+},
 
 
 };
