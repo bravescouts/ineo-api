@@ -16,6 +16,7 @@ var rmaline = require('./rmaline')
 var productmaster = require('./productmaster')
 var purchasedproduct = require('./purchasedproduct')
 var materialestimate = require('./materialestimate')
+var warehouse = require('./warehouse')
 var bodyParser = require('body-parser');
 
 var jsonParser = bodyParser.json()
@@ -47,6 +48,7 @@ app.use('/rma', rma);
 app.use('/rmaline', rmaline);
 app.use('/productmaster', productmaster);
 app.use('/purchasedproduct', purchasedproduct);
+app.use('/warehouse', warehouse);
 
 /*
 https.createServer({

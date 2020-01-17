@@ -1837,7 +1837,7 @@ deleteRMALine: function(id) {
 
       const query = {
         name: 'fetch-rmalines-byrma',
-        text: 'SELECT id, rma_id, erp_line_id, status, reason, exception, model_number, serial_number from rma_line where rma_id = $1',
+        text: 'SELECT id, product_id, rma_id, erp_line_id, status, reason, exception, model_number, serial_number from rma_line where rma_id = $1',
         values: [id]
       };
 
@@ -1951,6 +1951,125 @@ fetchProductMasterAll: function() {
   return promise;
 },
 
+createPurchasedProduct: function(id, status, request) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const ins_stmt = {
+        name: 'create-purchasedproduct',
+        text: 'INSERT INTO public.purchased_product(id, name, created, purchase_date, product_id, data_1, data_2, model_number, warranty_status, c_id, serial_number) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)',
+        values: [id, request.name, 'now()', request.purchase_date, request.product_id, request.data_1, request.data_2, request.model_number, request.warranty_status, request.c_id, request.serial_number] 
+      }
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(ins_stmt, (err, res) => {
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":ins_stmt,"error":err});
+
+            resolve({"executed":ins_stmt});
+
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+deletePurchasedProduct: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'delete-purchasedproduct',
+        text: "delete from purchased_product where id = $1",
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else
+              resolve({"deleted purchased_product id":id});
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+fetchPurchasedProductByContact: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-purchased-product-bycontact',
+        text: 'select id, name, created, purchase_date, product_id, data_1, data_2,model_number, warranty_status, c_id, serial_number from purchased_product where c_id = $1',
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve(res.rows);
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+fetchWarehouseAll: function() {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-warehouse-all',
+        text: 'SELECT id, geography, location, name from warehouse'
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve(res.rows);
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+},
 
 };
 
