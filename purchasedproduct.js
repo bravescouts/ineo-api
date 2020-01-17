@@ -68,4 +68,15 @@ router.get('/list/:id', function (req, res) {
 
 }),
 
+router.post('/update', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.updatePurchasedProduct(req.body)
+  .then(function(data) {
+    res.send(data);
+  });
+
+}),
+
 module.exports = router

@@ -1927,7 +1927,7 @@ fetchProductMasterAll: function() {
 
       const query = {
         name: 'fetch-productmaster-all',
-        text: 'select id, name, model_number, inventory_status, inventory_count, inventory_min, warehouse_id, bin from product_master'
+        text: 'select pm.name, pm.model_number, pm.inventory_status, pm.inventory_count, pm.inventory_min, pm.warehouse_id, pm.bin, w.geography, w.location, w.name warehouse_name from product_master pm, warehouse w where pm.warehouse_id = w.id'
       };
 
       pool.connect((err, client, done) => {
@@ -2063,6 +2063,60 @@ fetchWarehouseAll: function() {
               resolve(res.rows);
 
             }
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+/**
+ * function
+ *
+ **/
+updatePurchasedProduct: function(request) {
+
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+
+      var arr = Object.keys(request);
+      var cnt = 0;
+      var stringArr = [];
+      var whereClause = '';
+      var vals = Object.values(request);
+
+      arr.forEach(x => {
+        cnt++;
+
+        if(x != 'id')
+          stringArr.push(x + " = $" + cnt);
+        else
+          whereClause = ' where id = $' + cnt;
+
+      });
+
+      const ins_stmt = {
+        name: 'update-purchased-product',
+        text: 'UPDATE purchased_product SET ' + stringArr.join() + whereClause,
+        values: vals 
+      }
+
+      console.log(ins_stmt);
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(ins_stmt, (err, res) => {
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":ins_stmt,"error":err});
+
+            var result = Object.assign({used_qty:null}, request);
+
+            resolve(result);
          })
       })
 

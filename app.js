@@ -50,7 +50,7 @@ app.use('/productmaster', productmaster);
 app.use('/purchasedproduct', purchasedproduct);
 app.use('/warehouse', warehouse);
 
-/*
+
 https.createServer({
   key: fs.readFileSync('server.key'),
   cert: fs.readFileSync('server.cert')
@@ -58,6 +58,6 @@ https.createServer({
 .listen(5000, function () {
   console.log('https app listening on port 5000!')
 })
-*/
 
-app.listen(5000, () => console.log('app listening on port 5000!'))
+
+//app.listen(5000, () => console.log('app listening on port 5000!'))
