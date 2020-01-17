@@ -27,7 +27,7 @@ router.post('/create', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
 
-  common_db.getNextSequence('product_master_id_seq').then(function(data) {
+  common_db.getNextSequence('product_master').then(function(data) {
     seq = data.id;
     return common_db.createProductMaster(data.id, 'new', req.body);
 
@@ -50,6 +50,19 @@ router.get('/delete/:id', function (req, res) {
   if (!req.body) return res.sendStatus(400)
 
   common_db.deleteProductMaster(req.params.id).
+  then(function(data) {
+    res.send(data);
+  });
+
+}),
+
+//fetchProductMasterAll
+
+router.get('/list', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.fetchProductMasterAll().
   then(function(data) {
     res.send(data);
   });

@@ -27,7 +27,7 @@ router.post('/create', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
 
-  common_db.getNextSequence('purchased_product_id_seq').then(function(data) {
+  common_db.getNextSequence('purchased_product').then(function(data) {
     seq = data.id;
     return common_db.createPurchasedProduct(data.id, 'new', req.body);
 
@@ -50,6 +50,18 @@ router.get('/delete/:id', function (req, res) {
   if (!req.body) return res.sendStatus(400)
 
   common_db.deletePurchasedProduct(req.params.id).
+  then(function(data) {
+    res.send(data);
+  });
+
+}),
+
+
+router.get('/list/:id', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  common_db.fetchPurchasedProductByContact(req.params.id).
   then(function(data) {
     res.send(data);
   });

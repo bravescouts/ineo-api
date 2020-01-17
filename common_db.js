@@ -1862,6 +1862,95 @@ deleteRMALine: function(id) {
   return promise;
 },
 
+createProductMaster: function(id, status, request) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const ins_stmt = {
+        name: 'create-productmaster',
+        text: 'INSERT INTO public.product_master(id, name, model_number, inventory_status, inventory_count, inventory_min, warehouse_id, bin) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
+        values: [id, request.name, request.model_number, request.inventory_status, request.inventory_count, request.inventory_min, request.warehouse_id, request.bin]
+      }
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(ins_stmt, (err, res) => {
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":ins_stmt,"error":err});
+
+            resolve({"executed":ins_stmt});
+
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+deleteProductMaster: function(id) {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'delete-productmaster',
+        text: "delete from product_master where id = $1",
+        values: [id]
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else
+              resolve({"deleted product_master id":id});
+         })
+      })
+
+  })
+
+  return promise;
+},
+
+fetchProductMasterAll: function() {
+  var promise = new Bluebird(
+    function(resolve, reject) {
+
+      const query = {
+        name: 'fetch-productmaster-all',
+        text: 'select id, name, model_number, inventory_status, inventory_count, inventory_min, warehouse_id, bin from product_master'
+      };
+
+      pool.connect((err, client, done) => {
+        if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if(err)
+              reject({"result":-1,"executed":query,"error":err});
+
+            else {
+              resolve(res.rows);
+
+            }
+         })
+      })
+
+  })
+
+  return promise;
+},
+
 
 };
 
