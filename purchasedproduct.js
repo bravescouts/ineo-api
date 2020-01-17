@@ -27,14 +27,37 @@ router.post('/create', function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
 
-  common_db.getNextSequence('purchased_product').then(function(data) {
-    seq = data.id;
-    return common_db.createPurchasedProduct(data.id, 'new', req.body);
+  if (Array.isArray(req.body) ) {
 
-  }).then(function(data) {
-    var result = {"id":parseInt(seq)};
-    res.send(result);
-  });
+    var ret = [];
+
+    req.body.forEach(row => {
+
+      common_db.getNextSequence('purchased_product').then(function(data) {
+        seq = data.id;
+        return common_db.createPurchasedProduct(data.id, 'new', row);
+
+      }).then(function(data) {
+        var result = {"id":parseInt(seq)};
+      });
+
+    });
+
+    res.send(ret);
+
+  }
+  else {
+
+    common_db.getNextSequence('purchased_product').then(function(data) {
+      seq = data.id;
+      return common_db.createPurchasedProduct(data.id, 'new', req.body);
+
+    }).then(function(data) {
+      var result = {"id":parseInt(seq)};
+      res.send(result);
+    });
+
+  }
 
 
 }),

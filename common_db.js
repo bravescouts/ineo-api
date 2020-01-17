@@ -2125,5 +2125,53 @@ updatePurchasedProduct: function(request) {
   return promise;
 },
 
+validateProduct: function (request) {
+
+  var validationPromises = [];
+
+  request.forEach(ver => {
+
+      var promise = new Bluebird(
+
+        function (resolve, reject) {
+
+          const query = {
+            name: 'fetch-warehouse-all',
+            text: 'select purchased_product.serial_number, product_master.model_number from product_master left outer join purchased_product on (product_master.id = purchased_product.product_id and purchased_product.c_id = $1) where product_master.model_number = $2',
+          values: [ver.c_id, ver.model_number]
+        };
+
+        pool.connect((err, client, done) => {
+          if (err) throw err;
+
+          client.query(query, (err, res) => {
+
+            done();
+            if (err)
+              reject({
+                "result": -1,
+                "executed": query,
+                "error": err
+              });
+
+            else {
+              resolve(res.rows);
+
+            }
+          })
+        })
+
+      });
+
+    validationPromises.push(promise);
+
+  });
+
+  return Promise.all(validationPromises);
+
+},
+
+
+
 };
 

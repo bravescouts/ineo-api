@@ -98,5 +98,36 @@ router.get('/test', function (req, res) {
 
 }),
 
+/**
+ * function
+ *
+ **/
+
+router.post('/product/validation', function (req, res) {
+
+  if (!req.body) return res.sendStatus(400)
+
+  if(Array.isArray(req.body)) {
+
+    common_db.validateProduct(req.body)
+    .then((r) => {
+
+      res.send(r);
+
+    })
+    .catch((err) => {
+      res.send({"error":err});
+    });
+
+
+  }
+  else {
+    var result = {"result":-1};
+    res.send(result);
+  }
+
+}),
+
+
 
 module.exports = router
