@@ -112,7 +112,7 @@ router.post('/product/validation', function (req, res) {
     common_db.validateProduct(req.body)
     .then((r) => {
 
-      res.send(r);
+      res.send(r);  
 
     })
     .catch((err) => {

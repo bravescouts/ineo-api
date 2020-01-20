@@ -2137,7 +2137,7 @@ validateProduct: function (request) {
 
           const query = {
             name: 'fetch-warehouse-all',
-            text: 'select purchased_product.serial_number, product_master.model_number from product_master left outer join purchased_product on (product_master.id = purchased_product.product_id and purchased_product.c_id = $1) where product_master.model_number = $2',
+            text: 'select purchased_product.serial_number, product_master.model_number, product_master.inventory_count from product_master left outer join purchased_product on (product_master.id = purchased_product.product_id and purchased_product.c_id = $1) where product_master.model_number = $2',
           values: [ver.c_id, ver.model_number]
         };
 
@@ -2155,8 +2155,17 @@ validateProduct: function (request) {
               });
 
             else {
-              resolve(res.rows);
-
+              //resolve(res.rows);
+              if(res.rows.length == 0) {
+                let obj = {serial_number:null, model_number:null, warrantyStatus:null, inventoryStatus:null};
+                resolve(obj);
+              }
+              else { 
+                
+                let warr = res.rows[0].serial_number == null ? "Out of Warranty" : "In Warranty"; 
+                let obj = {serial_number:res.rows[0].serial_number, model_number:res.rows[0].model_number, warrantyStatus:warr, inventoryStatus:res.rows[0].inventory_count};
+                resolve(obj);
+              }
             }
           })
         })
